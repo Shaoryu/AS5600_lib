@@ -11,7 +11,7 @@ GPO:GND(3.3Vで永久書き込みモード、ただ使わないで) \
 \
 # サンプルプログラム
 
-
+```c
 #include "mbed.h"
 #include "AS5600.h"
 
@@ -28,3 +28,4 @@ int main() {
         ThisThread::sleep_for(1ms);
     }
 }
+```
