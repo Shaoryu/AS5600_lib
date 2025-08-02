@@ -8,7 +8,7 @@ DIR:DigitalOut(L:CWが正,H:CCWが正で値取得) \
 SCL:SCL \
 SDA:SDA \
 GPO:GND(3.3Vで永久書き込みモード、ただ使わないで) \
-\
+
 # サンプルプログラム
 
 ```c
