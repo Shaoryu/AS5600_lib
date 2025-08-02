@@ -3,15 +3,16 @@
 磁石はセンサから1mm程離してください \
 VCC:5V \
 OUT:なし \
-GND:GND
-DIR:DigitalOut(L:CWが正,H:CCWが正で値取得)
-SCL:SCL
-SDA:SDA
-GPO:GND(3.3Vで永久書き込みモード、ただ使わないで)
-以下サンプルプログラムです
+GND:GND \
+DIR:DigitalOut(L:CWが正,H:CCWが正で値取得) \
+SCL:SCL \
+SDA:SDA \
+GPO:GND(3.3Vで永久書き込みモード、ただ使わないで) \
+\
+# サンプルプログラム
 
 
-include "mbed.h"
+#include "mbed.h"
 #include "AS5600.h"
 
 I2C i2c(PB_7, PB_6); // SDA, SCL
