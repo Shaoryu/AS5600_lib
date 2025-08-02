@@ -1,25 +1,26 @@
 #include "AS5600.h"
 #include "mbed.h"
-AS5600::AS5600(I2C &i2c, PinName dirPin) : _i2c(i2c) {
-    if (dirPin != NC) {
-        _dir = new DigitalOut(dirPin);
-    } else {
-        _dir = nullptr;
-    }
+
+
+
+AS5600::AS5600(I2C &i2c, PinName dirPin) : _i2c(i2c) , _dir(dirPin) {
+    _i2c.frequency(100000);
+    _dirPin=dirPin;
 }
 
 bool AS5600::begin() {
+    setDirection(true);//cwが正
     // 通信確認としてANGLEレジスタを読んでみる
-    uint16_t angle = readScaledAngle();
+    uint16_t angle = read16(REG_ANGLE);
     return angle <= 4095;
 }
 
-uint16_t AS5600::readRawAngle() {
-    return read16(REG_RAW_ANGLE);
+float AS5600::readRawAngle() {
+    return (float)read16(REG_RAW_ANGLE) * 360. / 4096.;
 }
 
-uint16_t AS5600::readScaledAngle() {
-    return read16(REG_ANGLE);
+float AS5600::readScaledAngle() {
+    return (float)read16(REG_ANGLE) * 360. / 4096.;
 }
 
 bool AS5600::isMagnetDetected() {
@@ -32,8 +33,8 @@ uint8_t AS5600::readAGC() {
 }
 
 void AS5600::setDirection(bool clockwise) {
-    if (_dir) {
-        *_dir = !clockwise;
+    if (_dirPin!=NC) {
+        _dir = !clockwise;
     }
 }
 
