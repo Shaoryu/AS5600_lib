@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mbed.h"
+#include <cstdint>
 
 class AS5600 {
 public:
@@ -8,8 +9,11 @@ public:
 
     
 
-    // 初期化
+    // 初期化?
     bool begin();
+
+    // 角度の初期化
+    int reset(uint16_t angle);
 
     // 生の角度（RAW_ANGLE）
     float readRawAngle();
@@ -17,8 +21,18 @@ public:
     // スケーリングされた角度（ANGLE）
     float readScaledAngle();
 
+    // 生の角度（RAW_ANGLE）
+    int readRawAngle16();
+
+    // スケーリングされた角度（ANGLE）
+    int readScaledAngle16();
+
     // 接続されているか確認（MAGNET DETECTED）
     bool isMagnetDetected();
+
+    //-∞~∞に値の範囲を拡張
+    //threadの中で動かす前提
+    void ExpandedAngle(float angle);
 
     // AGC（自動ゲイン制御）値取得
     uint8_t readAGC();
@@ -28,6 +42,8 @@ public:
 
     uint16_t read16(char reg);
     uint8_t read8(char reg);
+
+    int _error=0;//0:正常-1:磁石がない
 
 private:
     I2C &_i2c;
@@ -40,5 +56,9 @@ private:
     static constexpr char REG_ANGLE = 0x0E;
     static constexpr char REG_STATUS = 0x0B;
     static constexpr char REG_AGC = 0x1A;
+    static constexpr char ADR_ZPOS = 0x01;
+
+    static constexpr float ANGLE_SCALE = 360.0f / 4096.0f;
+
 
 };
