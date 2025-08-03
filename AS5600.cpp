@@ -1,5 +1,7 @@
 #include "AS5600.h"
 #include "mbed.h"
+#include <cstdint>
+#include <stdint.h>
 
 
 
@@ -11,21 +13,62 @@ AS5600::AS5600(I2C &i2c, PinName dirPin) : _i2c(i2c) , _dir(dirPin) {
 bool AS5600::begin() {
     setDirection(true);//cwが正
     // 通信確認としてANGLEレジスタを読んでみる
-    uint16_t angle = read16(REG_ANGLE);
+    
+    uint16_t angle = read16(REG_RAW_ANGLE);
+    //reset(angle);
+    //ThisThread::sleep_for(1ms);
+    angle = read16(REG_ANGLE);
     return angle <= 4095;
 }
 
+int AS5600::reset(uint16_t angle){
+    char data[3];
+    data[0] = 0x01;               // ZPOS low byte register
+    data[1] = (angle >> 8) & 0x0F; // high byte (only lower 4 bits used)
+    data[2] = angle & 0xFF;       // low byte
+    int chk = !_i2c.write(AS5600_ADDR, data, 3);
+    ThisThread::sleep_for(1ms);//データシートに書いてあった。。。
+    return chk;
+}
+
 float AS5600::readRawAngle() {
-    return (float)read16(REG_RAW_ANGLE) * 360. / 4096.;
+    return (float)read16(REG_RAW_ANGLE) * ANGLE_SCALE;
 }
 
 float AS5600::readScaledAngle() {
-    return (float)read16(REG_ANGLE) * 360. / 4096.;
+    return (float)read16(REG_ANGLE) * ANGLE_SCALE;
 }
 
+int AS5600::readRawAngle16() {
+    return read16(REG_RAW_ANGLE);
+}
+
+int AS5600::readScaledAngle16() {
+    return read16(REG_ANGLE);
+}
 bool AS5600::isMagnetDetected() {
     uint8_t status = read8(REG_STATUS);
     return (status & 0x20); // MD bit
+}
+
+void AS5600::ExpandedAngle(float angle){
+    uint16_t prev_ang = readScaledAngle16();
+    uint16_t ang16 = 0;
+    int32_t rotation_count = 0;
+    int16_t delta = 0;
+    while (true) {
+        ang16 = readScaledAngle16();
+        delta = ang16 - prev_ang;
+        if (delta > 2048) {
+            // 例: 10 → 4090（逆回転）
+            rotation_count--;
+        } else if (delta < -2048) {
+            // 例: 4090 → 10（正回転）
+            rotation_count++;
+        }
+        prev_ang = ang16;
+        angle = rotation_count * 360.f + ang16 * ANGLE_SCALE;
+    }
 }
 
 uint8_t AS5600::readAGC() {
