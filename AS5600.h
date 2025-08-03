@@ -43,7 +43,6 @@ public:
     uint16_t read16(char reg);
     uint8_t read8(char reg);
 
-    int _error=0;//0:正常-1:磁石がない
 
 private:
     I2C &_i2c;
