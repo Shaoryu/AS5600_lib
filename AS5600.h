@@ -10,7 +10,7 @@ public:
     
 
     // 初期化?
-    bool begin();
+    bool begin(bool flag_reset = false);
 
     // 角度の初期化
     int reset(uint16_t angle);
@@ -32,7 +32,7 @@ public:
 
     //-∞~∞に値の範囲を拡張
     //threadの中で動かす前提
-    void ExpandedAngle(float angle);
+    void ExpandedAngle(float* angle);
 
     // AGC（自動ゲイン制御）値取得
     uint8_t readAGC();
@@ -59,6 +59,12 @@ private:
     static constexpr char ADR_ZPOS = 0x01;
 
     static constexpr float ANGLE_SCALE = 360.0f / 4096.0f;
+
+    uint16_t prev_ang = 0;
+    uint16_t ang16 = 0;
+    int32_t rotation_count = 0;
+    int16_t delta = 0;
+    bool flag_expandedAng  = true;
 
 
 };
