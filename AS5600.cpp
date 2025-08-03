@@ -51,7 +51,7 @@ bool AS5600::isMagnetDetected() {
     return (status & 0x20); // MD bit
 }
 
-void AS5600::ExpandedAngle(float angle){
+void AS5600::ExpandedAngle(float angle){//未確認！
     uint16_t prev_ang = readScaledAngle16();
     uint16_t ang16 = 0;
     int32_t rotation_count = 0;
