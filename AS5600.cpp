@@ -10,15 +10,16 @@ AS5600::AS5600(I2C &i2c, PinName dirPin) : _i2c(i2c) , _dir(dirPin) {
     _dirPin=dirPin;
 }
 
-bool AS5600::begin() {
+bool AS5600::begin(bool flag_reset) {
     setDirection(true);//cwが正
     // 通信確認としてANGLEレジスタを読んでみる
+    if(flag_reset){
+        reset(read16(REG_RAW_ANGLE));
+        ThisThread::sleep_for(1ms);
+    }
+    prev_ang = read16(REG_ANGLE);
     
-    uint16_t angle = read16(REG_RAW_ANGLE);
-    //reset(angle);
-    //ThisThread::sleep_for(1ms);
-    angle = read16(REG_ANGLE);
-    return angle <= 4095;
+    return prev_ang <= 4095;
 }
 
 int AS5600::reset(uint16_t angle){
@@ -27,6 +28,8 @@ int AS5600::reset(uint16_t angle){
     data[1] = (angle >> 8) & 0x0F; // high byte (only lower 4 bits used)
     data[2] = angle & 0xFF;       // low byte
     int chk = !_i2c.write(AS5600_ADDR, data, 3);
+
+    flag_expandedAng = true;
     ThisThread::sleep_for(1ms);//データシートに書いてあった。。。
     return chk;
 }
@@ -51,24 +54,23 @@ bool AS5600::isMagnetDetected() {
     return (status & 0x20); // MD bit
 }
 
-void AS5600::ExpandedAngle(float angle){//未確認！
-    uint16_t prev_ang = readScaledAngle16();
-    uint16_t ang16 = 0;
-    int32_t rotation_count = 0;
-    int16_t delta = 0;
-    while (true) {
-        ang16 = readScaledAngle16();
-        delta = ang16 - prev_ang;
-        if (delta > 2048) {
-            // 例: 10 → 4090（逆回転）
-            rotation_count--;
-        } else if (delta < -2048) {
-            // 例: 4090 → 10（正回転）
-            rotation_count++;
-        }
-        prev_ang = ang16;
-        angle = rotation_count * 360.f + ang16 * ANGLE_SCALE;
+void AS5600::ExpandedAngle(float* angle){
+    if(flag_expandedAng) {
+        prev_ang = readScaledAngle16();
+        flag_expandedAng = false;
     }
+
+    ang16 = readScaledAngle16();
+    delta = ang16 - prev_ang;
+    if (delta > 2048) {
+        // 例: 10 → 4090（逆回転）
+        rotation_count--;
+    } else if (delta < -2048) {
+        // 例: 4090 → 10（正回転）
+        rotation_count++;
+    }
+    prev_ang = ang16;
+    *angle = rotation_count * 360.f + ang16 * ANGLE_SCALE;
 }
 
 uint8_t AS5600::readAGC() {
