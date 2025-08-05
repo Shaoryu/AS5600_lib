@@ -4,7 +4,6 @@
 #include <stdint.h>
 
 
-
 AS5600::AS5600(I2C &i2c, PinName dirPin) : _i2c(i2c) , _dir(dirPin) {
     _i2c.frequency(100000);
     _dirPin=dirPin;
@@ -42,11 +41,11 @@ float AS5600::readScaledAngle() {
     return (float)read16(REG_ANGLE) * ANGLE_SCALE;
 }
 
-int AS5600::readRawAngle16() {
+uint16_t AS5600::readRawAngle16() {
     return read16(REG_RAW_ANGLE);
 }
 
-int AS5600::readScaledAngle16() {
+uint16_t AS5600::readScaledAngle16() {
     return read16(REG_ANGLE);
 }
 bool AS5600::isMagnetDetected() {
