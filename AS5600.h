@@ -7,8 +7,6 @@ class AS5600 {
 public:
     AS5600(I2C &i2c, PinName dirPin = NC);
 
-    
-
     // 初期化?
     bool begin(bool flag_reset = false);
 
@@ -16,16 +14,20 @@ public:
     int reset(uint16_t angle);
 
     // 生の角度（RAW_ANGLE）
+    //0~360°
     float readRawAngle();
 
     // スケーリングされた角度（ANGLE）
+    //0~360°
     float readScaledAngle();
 
     // 生の角度（RAW_ANGLE）
-    int readRawAngle16();
+    //0~4096
+    uint16_t readRawAngle16();
 
     // スケーリングされた角度（ANGLE）
-    int readScaledAngle16();
+    //0~4096
+    uint16_t readScaledAngle16();
 
     // 接続されているか確認（MAGNET DETECTED）
     bool isMagnetDetected();
@@ -43,6 +45,7 @@ public:
     uint16_t read16(char reg);
     uint8_t read8(char reg);
 
+    int _error=0;//0:正常-1:磁石がない
 
 private:
     I2C &_i2c;
