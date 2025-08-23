@@ -47,6 +47,8 @@ public:
 
     int _error=0;//0:正常-1:磁石がない
 
+    static constexpr float ANGLE_SCALE = 360.0f / 4096.0f;
+
 private:
     I2C &_i2c;
 
@@ -60,7 +62,6 @@ private:
     static constexpr char REG_AGC = 0x1A;
     static constexpr char ADR_ZPOS = 0x01;
 
-    static constexpr float ANGLE_SCALE = 360.0f / 4096.0f;
 
     uint16_t prev_ang = 0;
     uint16_t ang16 = 0;
